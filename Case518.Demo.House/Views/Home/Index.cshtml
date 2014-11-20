@@ -1,0 +1,138 @@
+﻿@model IEnumerable<Case518.Demo.House.Models.City>
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_BasicLayout.cshtml";
+}
+
+<div class="well">
+    <ul class="nav nav-pills single-select" id="city-selector">
+        <li class="active"><a href="#">不限</a></li>
+        @foreach (var city in Model)
+        {
+            <li>
+                <a href="#" data-id="@city.Id">@city.Name</a>
+                <ul>
+                    <li class="active"><a href="#">不限</a></li>
+                    @foreach (var region in city.Regions)
+                    {
+                        <li>
+                            <a href="#" data-id="@region.Id">@region.Name</a>
+                        </li>
+                    }
+                </ul>
+            </li>
+        }
+    </ul>
+</div>
+
+<div class="well" style="display: none;">
+    <ul class="nav nav-pills single-select" id="region-selector"></ul>
+</div>
+
+<div class="well">
+    <ul class="nav nav-pills single-select">
+        <li class="active">
+            <a href="#">不限</a>
+        </li>
+        <li>
+            <a href="#">5~10坪</a>
+        </li>
+        <li>
+            <a href="#">10~20坪</a>
+        </li>
+        <li>
+            <a href="#">20~30坪</a>
+        </li>
+
+    </ul>
+</div>
+
+<div class="well">
+    <ul class="nav nav-pills single-select">
+        <li class="active">
+            <a href="#">不限</a>
+        </li>
+        <li>
+            <a href="#">500萬以下</a>
+        </li>
+        <li>
+            <a href="#">500~1500萬</a>
+        </li>
+        <li>
+            <a href="#">1500~2000萬</a>
+        </li>
+        <li>
+            <a href="#">2000萬以上</a>
+        </li>
+    </ul>
+</div>
+
+<div class="well">
+    <ul class="nav nav-pills multi-select">
+        <li>
+            <a href="#">平面車位</a>
+        </li>
+        <li>
+            <a href="#">機械式車位</a>
+        </li>
+    </ul>
+</div>
+
+<script type="text/javascript">
+    //查詢用變數
+    var price, ground, parking, cityId, regionId;
+
+    $(function () {
+        //隱藏備用選單
+        $('#city-selector > li > ul').hide();
+        //縣市選單初始化
+        $('#city-selector > li > a').click(function () {
+            var id = $(this).attr("data-id");
+            var region_selector = $(this).next();
+
+            if (id) {
+                cityId = id;
+                regionId = null;
+                $('#region-selector').parent().show();
+            }
+            else {
+                cityId = null;
+                regionId = null;
+                $('#region-selector').parent().hide();
+            }
+
+            if (region_selector) {
+                $('#region-selector').html(region_selector.html());
+                //行政區選單初始化
+                $('#region-selector > li > a').click(function () {
+                    var id = $(this).attr("data-id");
+
+                    if (id) {
+                        regionId = id;
+                    } else {
+                        regionId = null;
+                    }
+                });
+            }
+            return;
+        });
+
+        //設定坪數選單
+
+        //設定總價選單
+
+        //設定車位選單
+
+        //所有切換動作設定(單選)
+        $(".single-select > li > a").click(function () {
+            if ($(this).parent().hasClass('active')) {
+                $(this).parent().parent().children('li').first().children('a').click();
+                return;
+            }
+
+            $(this).parent().parent().children('li').removeClass('active');
+            $(this).parent().addClass('active');
+            return;
+        });
+    });
+</script>
