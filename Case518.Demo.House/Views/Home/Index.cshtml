@@ -30,57 +30,104 @@
 </div>
 
 <div class="well">
-    <ul class="nav nav-pills single-select">
+    <ul class="nav nav-pills single-select" id="ground-selector">
         <li class="active">
             <a href="#">不限</a>
         </li>
         <li>
-            <a href="#">5~10坪</a>
+            <a href="#" data="5,10">5~10坪</a>
         </li>
         <li>
-            <a href="#">10~20坪</a>
+            <a href="#" date="10,20">10~20坪</a>
         </li>
         <li>
-            <a href="#">20~30坪</a>
+            <a href="#" data="20,30">20~30坪</a>
         </li>
 
     </ul>
 </div>
 
 <div class="well">
-    <ul class="nav nav-pills single-select">
+    <ul class="nav nav-pills single-select" id="price-selector">
         <li class="active">
             <a href="#">不限</a>
         </li>
         <li>
-            <a href="#">500萬以下</a>
+            <a href="#" data="0,500">500萬以下</a>
         </li>
         <li>
-            <a href="#">500~1500萬</a>
+            <a href="#" data="500,1500">500~1500萬</a>
         </li>
         <li>
-            <a href="#">1500~2000萬</a>
+            <a href="#" data="1500,2000">1500~2000萬</a>
         </li>
         <li>
-            <a href="#">2000萬以上</a>
+            <a href="#" data="2000,-1">2000萬以上</a>
         </li>
     </ul>
 </div>
 
 <div class="well">
-    <ul class="nav nav-pills multi-select">
+    <ul class="nav nav-pills multi-select" id="parking-selector">
         <li>
-            <a href="#">平面車位</a>
+            <a href="#" data="0">平面車位</a>
         </li>
         <li>
-            <a href="#">機械式車位</a>
+            <a href="#" data="1">機械式車位</a>
         </li>
     </ul>
+</div>
+
+<div class="well">
+    <div class="form-group">
+        <label>排序欄位</label>
+        <select class="form-control" id="sort-field">
+            <option value="ground" selected>坪數</option>
+            <option value="price">總價</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label>排序方式</label>
+        <select class="form-control" id="sort-type">
+            <option value="asc" selected>由少至多</option>
+            <option value="desc">由多至少</option>
+        </select>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">查詢結果</div>
+    <div class="panel-body">
+        <table class="table table-striped" id="query-result">
+            <thead>
+                <tr>
+                    <th>編號</th>
+                    <th>縣市</th>
+                    <th>行政區</th>
+                    <th>坪數</th>
+                    <th>總價</th>
+                    <th>車位</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <script type="text/javascript">
     //查詢用變數
-    var price, ground, parking, cityId, regionId;
+    var price = [], ground = [], parking = [], cityId = null, regionId = null;
+    var sort = {
+        field: 'ground',
+        type: 'asc'
+    };
+    var paging = {
+        page: 1,
+        limit: 20
+    };
+    var nextpage = 0;
 
     $(function () {
         //隱藏備用選單
@@ -113,26 +160,161 @@
                         regionId = null;
                     }
                 });
+
+                single($('#region-selector > li > a'));
             }
             return;
         });
 
         //設定坪數選單
+        $('#ground-selector > li > a').click(function() {
+            var data = $(this).attr('data');
 
-        //設定總價選單
-
-        //設定車位選單
-
-        //所有切換動作設定(單選)
-        $(".single-select > li > a").click(function () {
-            if ($(this).parent().hasClass('active')) {
-                $(this).parent().parent().children('li').first().children('a').click();
-                return;
+            if (data) {
+                ground = data.split(',');
+            } else {
+                ground = [];
             }
 
-            $(this).parent().parent().children('li').removeClass('active');
-            $(this).parent().addClass('active');
             return;
         });
+
+        //設定總價選單
+        $('#price-selector > li > a').click(function () {
+            var data = $(this).attr('data');
+
+            if (data) {
+                price = data.split(',');
+            } else {
+                price = [];
+            }
+
+            return;
+        });
+
+        //設定車位選單
+        $('#parking-selector > li > a').click(function () {
+            var li = $(this).parent();
+            if (li.hasClass('active')) {
+                var idx = parking.indexOf($(this).attr('data'));
+                if (idx >= 0) {
+                    parking.splice(idx, 1);
+                }
+            } else {
+                parking.push($(this).attr('data'));
+            }
+        });
+
+        //設定排序選單(欄位)
+        $('#sort-field').change(function() {
+            sort.field = $(this).val();
+            execQuery(true);
+        });
+
+        //設定排序選單(排序方式)
+        $('#sort-type').change(function() {
+            sort.type = $(this).val();
+            execQuery(true);
+        });
+
+        //偵測視窗捲動(捲動至底部偵測)
+        $(window).scroll(function () {
+            var yoffset = $(window).scrollTop() + $(window).height();
+            if (yoffset == $(document).height() && yoffset > nextpage) {
+                //往下載入資料
+                nextpage = $(document).height() + 100;
+                paging.page++;
+                execQuery(false);
+            }
+        });
+
+        //選單切換(單選)
+        single($(".single-select > li > a"));
+
+        //選單切換(多選)
+        multi($('.multi-select > li > a'));
+
+        //選單切換(單選)(工廠)
+        function single(item) {
+            item.click(function () {
+                if ($(this).parent().hasClass('active')) {
+                    $(this).parent().parent().children('li').first().children('a').click();
+                    return;
+                }
+
+                $(this).parent().parent().children('li').removeClass('active');
+                $(this).parent().addClass('active');
+
+                execQuery(true);
+                return;
+            });
+        }
+
+        //選單切換(多選)(工廠)
+        function multi(item) {
+            item.click(function () {
+                if ($(this).parent().hasClass('active')) {
+                    $(this).parent().removeClass('active');
+                } else {
+                    $(this).parent().addClass('active');
+                }
+
+                execQuery(true);
+                return;
+            });
+        }
+
+        //執行查詢
+        function execQuery(clearAll) {
+            if (clearAll) {
+                paging.page = 1;
+                nextpage = 0;
+            }
+
+            var qdata = {
+                cityId: cityId,
+                regionId: regionId,
+                price: price,
+                parking: parking,
+                ground: ground,
+                sort: sort,
+                paging: paging
+            };
+
+            console.log(qdata);
+
+            $.post('@Url.Content("~/api/query")', qdata, function (result) {
+                showDataToView(result, clearAll);
+            }, 'json');
+        }
+
+        //資料顯示到畫面中
+        function showDataToView(data, clearAll) {
+            var container = $("#query-result tbody");
+
+            if (clearAll) container.html('');
+
+            for (var key in data) {
+                var item = data[key];
+                var tr = $('<tr>');
+                var id = $('<td>').text(item.id);
+                var city = $('<td>').text(item.city.name);
+                var region = $('<td>').text(item.region.name);
+                var ground = $('<td>').text(item.ground + "坪");
+                var price = $('<td>').text(item.price + "萬");
+                var parking = $('<td>').text(item.parking == 0 ? '平面' : '機械');
+                tr.append(id);
+                tr.append(city);
+                tr.append(region);
+                tr.append(ground);
+                tr.append(price);
+                tr.append(parking);
+                tr.appendTo(container);
+            }
+
+            
+        }
+
+        execQuery(true);
     });
 </script>

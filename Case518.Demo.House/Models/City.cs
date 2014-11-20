@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Data.Entity;
 using System.Linq;
 using System.Web;
+using Newtonsoft.Json;
 
 namespace Case518.Demo.House.Models
 {
@@ -18,6 +19,7 @@ namespace Case518.Demo.House.Models
         /// <summary>
         /// 包含地區
         /// </summary>
+        [JsonIgnore]
         public ICollection<Region> Regions { get; set; }
     }
 }

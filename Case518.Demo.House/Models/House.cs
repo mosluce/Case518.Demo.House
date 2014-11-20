@@ -16,6 +16,11 @@ namespace Case518.Demo.House.Models
         public int Id { get; set; }
 
         /// <summary>
+        /// 縣市
+        /// </summary>
+        public  City City { get; set; }
+
+        /// <summary>
         /// 行政區
         /// </summary>
         public Region Region { get; set; }

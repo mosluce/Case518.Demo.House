@@ -44,6 +44,9 @@
     <Reference Include="EntityFramework.SqlServer">
       <HintPath>..\packages\EntityFramework.6.1.1\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
+    <Reference Include="LinqKit">
+      <HintPath>..\packages\LINQKit.1.1.1\lib\net45\LinqKit.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -132,10 +135,23 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Controllers\WebAPI\CitiesController.cs" />
+    <Compile Include="Controllers\WebAPI\QueryController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201411200059080_InitialCreate.cs" />
+    <Compile Include="Migrations\201411200059080_InitialCreate.Designer.cs">
+      <DependentUpon>201411200059080_InitialCreate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201411200108182_Init.cs" />
+    <Compile Include="Migrations\201411200108182_Init.Designer.cs">
+      <DependentUpon>201411200108182_Init.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201411200159314_Mod-201411200959.cs" />
+    <Compile Include="Migrations\201411200159314_Mod-201411200959.Designer.cs">
+      <DependentUpon>201411200159314_Mod-201411200959.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\City.cs" />
     <Compile Include="Models\House.cs" />
     <Compile Include="Models\HouseModel.cs" />
@@ -155,6 +171,17 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\201411200059080_InitialCreate.resx">
+      <DependentUpon>201411200059080_InitialCreate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201411200108182_Init.resx">
+      <DependentUpon>201411200108182_Init.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201411200159314_Mod-201411200959.resx">
+      <DependentUpon>201411200159314_Mod-201411200959.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

@@ -66,7 +66,8 @@ namespace Case518.Demo.House.Controllers
                             Ground = ground,
                             Price = price,
                             Parking = (ground%2 == 0) ? Parking.Plane : Parking.Mechanical,
-                            Region = region
+                            Region = region,
+                            City = region.City
                         });
 
                         db.SaveChanges();
@@ -84,21 +85,15 @@ namespace Case518.Demo.House.Controllers
 
         public ActionResult Index()
         {
+            //初始化資料
+            InitData();
+
             using (var db = new HouseModel())
             {
+                //取出縣市、行政區資料供給View使用
                 var cities = db.Cities.Include("Regions").ToList();
                 return View(cities);
             }
-        }
-
-        #endregion
-
-        #region 查詢介面
-
-        [HttpPost]
-        public ActionResult Query(QueryViewModel model)
-        {
-            return Json(model);
         }
 
         #endregion
