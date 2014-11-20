@@ -3,7 +3,7 @@ namespace Case518.Demo.House.Migrations
     using System;
     using System.Data.Entity.Migrations;
     
-    public partial class InitialCreate : DbMigration
+    public partial class Init : DbMigration
     {
         public override void Up()
         {
@@ -36,10 +36,13 @@ namespace Case518.Demo.House.Migrations
                         Parking = c.Int(nullable: false),
                         Price = c.Int(nullable: false),
                         Ground = c.Int(nullable: false),
+                        City_Id = c.Int(),
                         Region_Id = c.Int(),
                     })
                 .PrimaryKey(t => t.Id)
+                .ForeignKey("dbo.Cities", t => t.City_Id)
                 .ForeignKey("dbo.Regions", t => t.Region_Id)
+                .Index(t => t.City_Id)
                 .Index(t => t.Region_Id);
             
         }
@@ -47,8 +50,10 @@ namespace Case518.Demo.House.Migrations
         public override void Down()
         {
             DropForeignKey("dbo.Houses", "Region_Id", "dbo.Regions");
+            DropForeignKey("dbo.Houses", "City_Id", "dbo.Cities");
             DropForeignKey("dbo.Regions", "City_Id", "dbo.Cities");
             DropIndex("dbo.Houses", new[] { "Region_Id" });
+            DropIndex("dbo.Houses", new[] { "City_Id" });
             DropIndex("dbo.Regions", new[] { "City_Id" });
             DropTable("dbo.Houses");
             DropTable("dbo.Regions");

@@ -9,8 +9,7 @@ namespace Case518.Demo.House.Migrations
     {
         public Configuration()
         {
-            AutomaticMigrationsEnabled = true;
-            ContextKey = "Case518.Demo.House.Models.HouseModel";
+            AutomaticMigrationsEnabled = false;
         }
 
         protected override void Seed(Case518.Demo.House.Models.HouseModel context)

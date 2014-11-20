@@ -117,6 +117,7 @@
     <Content Include="fonts\glyphicons-halflings-regular.eot" />
     <Content Include="Content\bootstrap-theme.css.map" />
     <Content Include="Content\bootstrap.css.map" />
+    <None Include="Properties\PublishProfiles\case518-78412.pubxml" />
     <None Include="Scripts\jquery-2.1.1.intellisense.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
@@ -139,17 +140,9 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201411200059080_InitialCreate.cs" />
-    <Compile Include="Migrations\201411200059080_InitialCreate.Designer.cs">
-      <DependentUpon>201411200059080_InitialCreate.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201411200108182_Init.cs" />
-    <Compile Include="Migrations\201411200108182_Init.Designer.cs">
-      <DependentUpon>201411200108182_Init.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201411200159314_Mod-201411200959.cs" />
-    <Compile Include="Migrations\201411200159314_Mod-201411200959.Designer.cs">
-      <DependentUpon>201411200159314_Mod-201411200959.cs</DependentUpon>
+    <Compile Include="Migrations\201411200725541_Init.cs" />
+    <Compile Include="Migrations\201411200725541_Init.Designer.cs">
+      <DependentUpon>201411200725541_Init.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\City.cs" />
@@ -173,14 +166,8 @@
     <Folder Include="App_Data\" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201411200059080_InitialCreate.resx">
-      <DependentUpon>201411200059080_InitialCreate.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201411200108182_Init.resx">
-      <DependentUpon>201411200108182_Init.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201411200159314_Mod-201411200959.resx">
-      <DependentUpon>201411200159314_Mod-201411200959.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201411200725541_Init.resx">
+      <DependentUpon>201411200725541_Init.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

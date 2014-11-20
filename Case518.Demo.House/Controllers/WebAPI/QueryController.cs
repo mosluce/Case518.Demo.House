@@ -60,7 +60,23 @@ namespace Case518.Demo.House.Controllers.WebAPI
                 
                 if (model.Parking != null)
                 {
+                    if (model.Parking.Contains(0) && model.Parking.Contains(1))
+                    {
+                        query = query.Where(c => c.Parking == Parking.Plane || c.Parking == Parking.Mechanical);
+                    }
+                    else
+                    {
+                        if (model.Parking.Contains(0))
+                        {
+                            query = query.Where(c => c.Parking == Parking.Plane);
+                        }
 
+                        if (model.Parking.Contains(1))
+                        {
+                            query = query.Where(c => c.Parking == Parking.Mechanical);
+                        }
+
+                    }
                 }
                 #endregion
 
