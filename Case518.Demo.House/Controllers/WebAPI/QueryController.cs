@@ -111,10 +111,6 @@ namespace Case518.Demo.House.Controllers.WebAPI
 
                 return Request.CreateResponse(HttpStatusCode.OK, houses);
             }
-
-/*
-            return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "查詢失敗");
-*/
         }
     }
 }

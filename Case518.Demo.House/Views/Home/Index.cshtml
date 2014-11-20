@@ -221,8 +221,9 @@
         $(window).scroll(function () {
             var yoffset = $(window).scrollTop() + $(window).height();
             if (yoffset == $(document).height() && yoffset > nextpage) {
-                //往下載入資料
+                //下一次增加資料的界線
                 nextpage = $(document).height() + 100;
+                //往下載入資料
                 paging.page++;
                 execQuery(false);
             }
@@ -267,6 +268,7 @@
         //執行查詢
         function execQuery(clearAll) {
             if (clearAll) {
+                //清除資料需要重置的參數
                 paging.page = 1;
                 nextpage = 0;
             }
@@ -281,8 +283,6 @@
                 paging: paging
             };
 
-            console.log(qdata);
-
             $.post('@Url.Content("~/api/query")', qdata, function (result) {
                 showDataToView(result, clearAll);
             }, 'json');
@@ -292,10 +292,12 @@
         function showDataToView(data, clearAll) {
             var container = $("#query-result tbody");
 
+            //清除原有列
             if (clearAll) container.html('');
 
             for (var key in data) {
                 var item = data[key];
+                //製作要插入的列
                 var tr = $('<tr>');
                 var id = $('<td>').text(item.id);
                 var city = $('<td>').text(item.city.name);
@@ -303,16 +305,17 @@
                 var ground = $('<td>').text(item.ground + "坪");
                 var price = $('<td>').text(item.price + "萬");
                 var parking = $('<td>').text(item.parking == 0 ? '平面' : '機械');
+                //插入內容
                 tr.append(id);
                 tr.append(city);
                 tr.append(region);
                 tr.append(ground);
                 tr.append(price);
                 tr.append(parking);
+                //插入列
                 tr.appendTo(container);
             }
 
-            
         }
 
         execQuery(true);
