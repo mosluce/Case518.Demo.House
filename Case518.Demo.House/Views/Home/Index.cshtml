@@ -79,7 +79,7 @@
 </div>
 
 <div class="panel panel-default">
-    <div class="panel-heading">查詢結果</div>
+    <div class="panel-heading">查詢結果 - 共<span id="total-count"></span>筆</div>
     <div class="panel-body">
         <div id="map" style="width: 100%; height: 400px;"></div>
     </div>
@@ -103,8 +103,11 @@
 </div>
 
 <script type="text/javascript">
-    var map, infobox;
+    var map, geocoder, infobox;
     var markers = [];
+    var defaultLat = @ViewBag.DefaultLat;
+    var defaultLng = @ViewBag.DefaultLng;
+
     //查詢用變數
     var price = [], ground = [], parking = [], cityId = null, regionId = null;
 
@@ -116,19 +119,24 @@
                 maxZoom: 17,
                 minZoom: 14,
                 scaleControl: true,
-                center: new google.maps.LatLng(25.0263075, 121.543846)
+                center: new google.maps.LatLng(defaultLat, defaultLng)
             });
         //地圖事件
         google.maps.event.addListener(map, "click", function () {
             infobox.close();
             infobox = null;
         });
+        //地理編碼器初始化
+        geocoder = new google.maps.Geocoder();
         //隱藏備用選單
         $('#city-selector > li > ul').hide();
         //縣市選單初始化
         $('#city-selector > li > a').click(function () {
             var id = $(this).attr("data-id");
+            var cityName = $(this).text();
             var region_selector = $(this).next();
+
+            setMapCenterByAddress(cityName);
 
             if (id) {
                 cityId = id;
@@ -146,6 +154,9 @@
                 //行政區選單初始化
                 $('#region-selector > li > a').click(function () {
                     var id = $(this).attr("data-id");
+                    var regionName = $(this).text();
+
+                    setMapCenterByAddress(cityName+regionName);
 
                     if (id) {
                         regionId = id;
@@ -204,6 +215,15 @@
         //選單切換(多選)
         multi($('.multi-select > li > a'));
 
+        //使用地址設定地圖中心點
+        function setMapCenterByAddress(address) {
+            geocoder.geocode({ address: address }, function (result, status) {
+                if (status == google.maps.GeocoderStatus.OK) {
+                    map.setCenter(result[0].geometry.location);
+                }
+            });
+        }
+
         //選單切換(單選)(工廠)
         function single(item) {
             item.click(function () {
@@ -235,7 +255,6 @@
         }
 
         //執行查詢
-
         function execQuery() {
             var qdata = {
                 cityId: cityId,
@@ -250,10 +269,40 @@
             }, 'json');
         }
 
+        //清除查詢
+        function clearQuery() {
+            //清除坪數查詢
+            $("#ground-selector > li").removeClass("active");
+            $("#ground-selector > li").first().addClass("active");
+
+            //清除總價查詢
+            $("#price-selector > li").removeClass("active");
+            $("#price-selector > li").first().addClass("active");
+
+            //清除地區查詢
+            $("#city-selector > li").removeClass("active");
+            $("#region-selector").parent().hide();
+            $("#city-selector > li").first().addClass("active");
+
+            //清除車位選擇
+            $("#parking-selector > li").removeClass("active");
+
+            //Map置中
+            map.setCenter(new google.maps.LatLng(defaultLat, defaultLng));
+
+            //清除查詢條件
+            price = [];
+            ground = [];
+            parking = [];
+            cityId = null;
+            regionId = null;
+
+            //執行查詢
+            execQuery();
+        }
+
         //在地圖中繪製標示
         function showMarkersToMap(data) {
-            console.log(data);
-
             //清除原有的Marker
             if (markers.length > 0) {
                 for (var i = 0; i < markers.length; i++) {
@@ -262,33 +311,48 @@
                 }
             }
 
+            //沒有資料時
+            if (data.length == 0) {
+                alert("查詢不到任何物件");
+                clearQuery();
+                return;
+            }
+
+            //顯示筆數
+            $("#total-count").text(data.length);
+
             //放入新的Marker
             for (var k in data) {
-                var item = data[k];
-                var marker = new google.maps.Marker({
-                    position: new google.maps.LatLng(item.lat, item.lng),
-                    map: map
-                });
-
-                google.maps.event.addListener(marker, 'click', function (e) {
-                    var place = $("<div>").html("所在地:" + item.city.name + item.region.name);
-                    var ground = $("<div>").html("坪數:" + item.ground + "坪");
-                    var price = $("<div>").html("總價:" + item.price + "萬");
-                    var parking = $("<div>").html("車位:" + item.parking == 0 ? "平面車位" : "機械式車位");
-
-                    $("#infobox-data").html('');
-                    $("#infobox-data").append(place);
-                    $("#infobox-data").append(ground);
-                    $("#infobox-data").append(price);
-                    $("#infobox-data").append(parking);
-
-                    createInfoBox(this);
-                });
-
-                markers.push(marker);
+                createMarker(data[k]);
             }
         }
 
+        //建立Marker工廠
+        function createMarker(item) {
+            var marker = new google.maps.Marker({
+                position: new google.maps.LatLng(item.lat, item.lng),
+                map: map
+            });
+
+            google.maps.event.addListener(marker, 'click', function (e) {
+                var place = $("<div>").html("所在地:" + item.city.name + item.region.name);
+                var ground = $("<div>").html("坪數:" + item.ground + "坪");
+                var price = $("<div>").html("總價:" + item.price + "萬");
+                var parking = $("<div>").html("車位:" + item.parking == 0 ? "平面車位" : "機械式車位");
+
+                $("#infobox-data").html('');
+                $("#infobox-data").append(place);
+                $("#infobox-data").append(ground);
+                $("#infobox-data").append(price);
+                $("#infobox-data").append(parking);
+
+                createInfoBox(this);
+            });
+
+            markers.push(marker);
+        }
+
+        //建立InfoBox工廠
         function createInfoBox(marker) {
             if (infobox) infobox.close();
 

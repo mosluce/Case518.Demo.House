@@ -5,6 +5,7 @@ using System.Web.Helpers;
 using System.Web.Mvc;
 using Case518.Demo.House.Models;
 using Case518.Demo.House.ViewModels;
+using System.Web.Configuration;
 
 namespace Case518.Demo.House.Controllers
 {
@@ -105,6 +106,10 @@ namespace Case518.Demo.House.Controllers
             {
                 //取出縣市、行政區資料供給View使用
                 var cities = db.Cities.Include("Regions").ToList();
+
+                ViewBag.DefaultLat = WebConfigurationManager.AppSettings["MapDefaultCenterLat"];
+                ViewBag.DefaultLng = WebConfigurationManager.AppSettings["MapDefaultCenterLng"];
+                
                 return View(cities);
             }
         }
