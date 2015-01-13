@@ -256,6 +256,8 @@
 
         //執行查詢
         function execQuery() {
+            if(infobox) infobox.close();
+
             var qdata = {
                 cityId: cityId,
                 regionId: regionId,
@@ -306,14 +308,14 @@
             //清除原有的Marker
             if (markers.length > 0) {
                 for (var i = 0; i < markers.length; i++) {
-                    var marker = markers.pop();
-                    marker.setMap(null);
+                    markers[i].setMap(null);
                 }
+                markers = [];
             }
 
             //沒有資料時
             if (data.length == 0) {
-                alert("查詢不到任何物件");
+                alert("查詢不到資料");
                 clearQuery();
                 return;
             }
@@ -329,6 +331,8 @@
 
         //建立Marker工廠
         function createMarker(item) {
+            console.log(item);
+
             var marker = new google.maps.Marker({
                 position: new google.maps.LatLng(item.lat, item.lng),
                 map: map
@@ -338,7 +342,7 @@
                 var place = $("<div>").html("所在地:" + item.city.name + item.region.name);
                 var ground = $("<div>").html("坪數:" + item.ground + "坪");
                 var price = $("<div>").html("總價:" + item.price + "萬");
-                var parking = $("<div>").html("車位:" + item.parking == 0 ? "平面車位" : "機械式車位");
+                var parking = $("<div>").html("車位:" + (item.parking == 0 ? "平面車位" : "機械式車位"));
 
                 $("#infobox-data").html('');
                 $("#infobox-data").append(place);
