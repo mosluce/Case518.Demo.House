@@ -1,0 +1,128 @@
+﻿@model IEnumerable<Case518.Demo.House.Models.City>
+@{
+    ViewBag.Title = "Editor";
+    Layout = "~/Views/Shared/_BasicLayout.cshtml";
+}
+
+<div class="well">
+    <ul class="nav nav-pills single-select" id="city-selector">
+        @foreach (var city in Model)
+        {
+            <li>
+                <a href="#" data-id="@city.Id">@city.Name</a>
+                <ul>
+                    @foreach (var region in city.Regions)
+                    {
+                        <li>
+                            <a href="#" data-id="@region.Id">@region.Name</a>
+                        </li>
+                    }
+                </ul>
+            </li>
+        }
+    </ul>
+</div>
+<div class="panel panel-default">
+    <form class="panel-body">
+        <div class="form-group">
+            <label for="ground">坪數</label>
+            <input id="ground" name="ground" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label for="price">總價</label>
+            <input id="price" name="price" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label for="parking">車位</label>
+            <select id="parking" name="parking" class="form-control">
+                <option value="0">平面車位</option>
+                <option value="1">機械式車位</option>
+            </select>
+        </div>
+        <input type="submit" value="建立" class="btn btn-default" />
+    </form>
+</div>
+<div id="map" style="width: 100%; height: 500px;"></div>
+<script type="text/javascript">
+    var data = { regionId: null, lat: null, lng: null, parking: null, ground: null, price: null };
+    var map, geocoder, marker;
+
+    //使用地址設定地圖中心點
+    function setMapCenterByAddress(address) {
+        geocoder.geocode({ address: address }, function (result, status) {
+            if (status == google.maps.GeocoderStatus.OK) {
+                map.setCenter(result[0].geometry.location);
+            } else {
+                alert("Not Found");
+            }
+        });
+    }
+
+    //設置Marker位置並記錄所選位置
+    function setMarker(ll) {
+        data.lat = ll.lat();
+        data.lng = ll.lng();
+
+        //只有一個Marker
+        if (marker == null) {
+            marker = new google.maps.Marker({
+                position: ll,
+                map: map
+            });
+        } else {
+            marker.setPosition(ll);
+        }
+    }
+
+    $(function () {
+        //地圖初始化
+        map = new google.maps.Map(document.getElementById('map'),
+            {
+                zoom: 17,
+                maxZoom: 17,
+                minZoom: 14,
+                scaleControl: true,
+                center: new google.maps.LatLng(25.0263075, 121.543846)
+            });
+
+        //地理編碼器初始化
+        geocoder = new google.maps.Geocoder();
+
+        //地圖點擊事件
+        google.maps.event.addListener(map, 'click', function (e) {
+            setMarker(e.latLng);
+        });
+
+        //選擇地區紀錄地區ID並移動地圖到指定地區
+        $('#city-selector ul li a').click(function () {
+            data.regionId = $(this).attr("data-id");
+
+            var regionName = $(this).text();
+            var cityName = $($(this).parents('li')[1]).children('a').text();
+
+            setMapCenterByAddress(cityName + regionName);
+        });
+
+        $('form').submit(function (e) {
+            e.preventDefault();
+
+            data.price = $("#price").val();
+            data.ground = $("#ground").val();
+            data.parking = $("#parking :selected").attr("value");
+
+            for (var k in data) {
+                if (!data[k]) {
+                    alert(k + " is not specify");
+                    return false;
+                }
+            }
+
+            $.post('@Url.Content("~/api/house")', data, function (res) {
+                $("form")[0].reset();
+            }, 'json');
+
+            return false;
+        });
+    });
+</script>
+

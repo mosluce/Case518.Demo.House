@@ -6,7 +6,7 @@ namespace Case518.Demo.House.Migrations
     using System.Data.Entity.Migrations.Infrastructure;
     using System.Resources;
     
-    [GeneratedCode("EntityFramework.Migrations", "6.1.1-30610")]
+    [GeneratedCode("EntityFramework.Migrations", "6.1.2-31219")]
     public sealed partial class Init : IMigrationMetadata
     {
         private readonly ResourceManager Resources = new ResourceManager(typeof(Init));

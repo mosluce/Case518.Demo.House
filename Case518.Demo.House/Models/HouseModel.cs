@@ -24,6 +24,7 @@
         public virtual DbSet<City> Cities  { get; set; }
         public virtual DbSet<Region> Regions { get; set; }
         public virtual DbSet<House> Houses { get; set; }
+        public virtual DbSet<Photo> Photos { get; set; }
     }
 
     //public class MyEntity

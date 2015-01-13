@@ -47,35 +47,48 @@ namespace Case518.Demo.House.Controllers
 
                 #endregion
 
+                #region 初始化照片資料
+                if (!db.Photos.Any())
+                {
+                    db.Photos.Add(new Photo()
+                    {
+                        Path = "/Assets/1487051.png"
+                    });
+
+                    db.SaveChanges();
+                }
+                #endregion
+
                 #region 初始化房屋資料
 
-                if (!db.Houses.Any())
-                {
-                    Region[] regions = db.Regions.ToArray();
+                //if (!db.Houses.Any())
+                //{
+                //    Region[] regions = db.Regions.ToArray();
+                //    Photo photo = db.Photos.FirstOrDefault();
 
-                    for (int i = 0; i < 300; i++)
-                    {
-                        var rnd = new Random(DateTime.Now.Millisecond);
-                        int idx = rnd.Next(0, regions.Length - 1);
-                        Region region = regions[idx];
-                        int ground = rnd.Next(5, 30);
-                        int price = rnd.Next(300, 3000);
+                //    for (int i = 0; i < 300; i++)
+                //    {
+                //        var rnd = new Random(DateTime.Now.Millisecond);
+                //        int idx = rnd.Next(0, regions.Length - 1);
+                //        Region region = regions[idx];
+                //        int ground = rnd.Next(5, 30);
+                //        int price = rnd.Next(300, 3000);
 
-                        db.Houses.Add(new Models.House
-                        {
-                            Ground = ground,
-                            Price = price,
-                            Parking = (ground%2 == 0) ? Parking.Plane : Parking.Mechanical,
-                            Region = region,
-                            City = region.City
-                        });
+                //        db.Houses.Add(new Models.House
+                //        {
+                //            Ground = ground,
+                //            Price = price,
+                //            Parking = (ground % 2 == 0) ? Parking.Plane : Parking.Mechanical,
+                //            Region = region,
+                //            City = region.City
+                //        });
 
-                        db.SaveChanges();
-                    }
-                }
+                //        db.SaveChanges();
+                //    }
+                //}
+
+                #endregion
             }
-
-            #endregion
         }
 
         #endregion

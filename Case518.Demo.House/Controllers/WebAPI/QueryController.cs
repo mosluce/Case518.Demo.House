@@ -81,45 +81,45 @@ namespace Case518.Demo.House.Controllers.WebAPI
                 #endregion
 
                 #region 排序
-                if (model.Sort != null)
-                {
-                    var field = model.Sort.Field;
-                    var type = model.Sort.Type;
+                //if (model.Sort != null)
+                //{
+                //    var field = model.Sort.Field;
+                //    var type = model.Sort.Type;
 
-                    if (type.Equals("asc"))
-                    {
-                        //小 >>> 大
-                        if (field.Equals("ground"))
-                        {
-                            query = query.OrderBy(c => c.Ground);
-                        }
-                        else
-                        {
-                            query = query.OrderBy(c => c.Price);
-                        }
-                    }
-                    else
-                    {
-                        //大 >>> 小
-                        if (field.Equals("ground"))
-                        {
-                            query = query.OrderByDescending(c => c.Ground);
-                        }
-                        else
-                        {
-                            query = query.OrderByDescending(c => c.Price);
-                        }
-                    }
-                }
+                //    if (type.Equals("asc"))
+                //    {
+                //        //小 >>> 大
+                //        if (field.Equals("ground"))
+                //        {
+                //            query = query.OrderBy(c => c.Ground);
+                //        }
+                //        else
+                //        {
+                //            query = query.OrderBy(c => c.Price);
+                //        }
+                //    }
+                //    else
+                //    {
+                //        //大 >>> 小
+                //        if (field.Equals("ground"))
+                //        {
+                //            query = query.OrderByDescending(c => c.Ground);
+                //        }
+                //        else
+                //        {
+                //            query = query.OrderByDescending(c => c.Price);
+                //        }
+                //    }
+                //}
                 #endregion
 
                 #region 分頁
 
-                if (model.Paging != null)
-                {
-                    var paging = model.Paging;
-                    query = query.Skip((paging.Page - 1)*paging.Limit).Take(paging.Limit);
-                }
+                //if (model.Paging != null)
+                //{
+                //    var paging = model.Paging;
+                //    query = query.Skip((paging.Page - 1) * paging.Limit).Take(paging.Limit);
+                //}
 
                 #endregion
 

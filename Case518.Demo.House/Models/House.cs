@@ -39,5 +39,20 @@ namespace Case518.Demo.House.Models
         /// 坪數
         /// </summary>
         public int Ground { get; set; }
+
+        /// <summary>
+        /// 照片
+        /// </summary>
+        public List<Photo> Photos { get; set; }
+
+        /// <summary>
+        /// 緯度
+        /// </summary>
+        public double Lat { get; set; }
+
+        /// <summary>
+        /// 經度
+        /// </summary>
+        public double Lng { get; set; }
     }
 }

@@ -78,58 +78,51 @@
     </ul>
 </div>
 
-<div class="well">
-    <div class="form-group">
-        <label>排序欄位</label>
-        <select class="form-control" id="sort-field">
-            <option value="ground" selected>坪數</option>
-            <option value="price">總價</option>
-        </select>
-    </div>
-    <div class="form-group">
-        <label>排序方式</label>
-        <select class="form-control" id="sort-type">
-            <option value="asc" selected>由少至多</option>
-            <option value="desc">由多至少</option>
-        </select>
-    </div>
-</div>
-
 <div class="panel panel-default">
     <div class="panel-heading">查詢結果</div>
     <div class="panel-body">
-        <table class="table table-striped" id="query-result">
-            <thead>
-                <tr>
-                    <th>編號</th>
-                    <th>縣市</th>
-                    <th>行政區</th>
-                    <th>坪數</th>
-                    <th>總價</th>
-                    <th>車位</th>
-                </tr>
-            </thead>
-            <tbody>
-                
-            </tbody>
-        </table>
+        <div id="map" style="width: 100%; height: 400px;"></div>
+    </div>
+</div>
+
+<div style="display: none;">
+    <div id="infobox-wrapper" class="container-fluid" style="width: 360px;">
+        <div class="row" style="background-color: white;">
+            <img class="col-md-5" src="@Url.Content("~/Assets/1487051.png")" />
+            <div class="col-md-5" style="padding: 5px;" id="infobox-data">
+                所在地: 
+                坪數:
+                總價:
+                車位:
+            </div>
+        </div>
+        <div style="height: 15px; background-position: center bottom; background-size: 15px 15px; background-repeat: no-repeat; background-image:url('@Url.Content("~/Assets/arrow.png")');" class="row">
+
+        </div>
     </div>
 </div>
 
 <script type="text/javascript">
+    var map, infobox;
+    var markers = [];
     //查詢用變數
     var price = [], ground = [], parking = [], cityId = null, regionId = null;
-    var sort = {
-        field: 'ground',
-        type: 'asc'
-    };
-    var paging = {
-        page: 1,
-        limit: 20
-    };
-    var nextpage = 0;
 
     $(function () {
+        //初始化地圖
+        map = new google.maps.Map(document.getElementById('map'),
+            {
+                zoom: 17,
+                maxZoom: 17,
+                minZoom: 14,
+                scaleControl: true,
+                center: new google.maps.LatLng(25.0263075, 121.543846)
+            });
+        //地圖事件
+        google.maps.event.addListener(map, "click", function () {
+            infobox.close();
+            infobox = null;
+        });
         //隱藏備用選單
         $('#city-selector > li > ul').hide();
         //縣市選單初始化
@@ -205,30 +198,6 @@
             }
         });
 
-        //設定排序選單(欄位)
-        $('#sort-field').change(function() {
-            sort.field = $(this).val();
-            execQuery(true);
-        });
-
-        //設定排序選單(排序方式)
-        $('#sort-type').change(function() {
-            sort.type = $(this).val();
-            execQuery(true);
-        });
-
-        //偵測視窗捲動(捲動至底部偵測)
-        $(window).scroll(function () {
-            var yoffset = $(window).scrollTop() + $(window).height();
-            if (yoffset == $(document).height() && yoffset > nextpage) {
-                //下一次增加資料的界線
-                nextpage = $(document).height() + 100;
-                //往下載入資料
-                paging.page++;
-                execQuery(false);
-            }
-        });
-
         //選單切換(單選)
         single($(".single-select > li > a"));
 
@@ -266,58 +235,73 @@
         }
 
         //執行查詢
-        function execQuery(clearAll) {
-            if (clearAll) {
-                //清除資料需要重置的參數
-                paging.page = 1;
-                nextpage = 0;
-            }
 
+        function execQuery() {
             var qdata = {
                 cityId: cityId,
                 regionId: regionId,
                 price: price,
                 parking: parking,
                 ground: ground,
-                sort: sort,
-                paging: paging
             };
 
-            $.post('@Url.Content("~/api/query")', qdata, function (result) {
-                showDataToView(result, clearAll);
+            $.post("@Url.Content("~/api/query")", qdata, function (result) {
+                showMarkersToMap(result);
             }, 'json');
         }
 
-        //資料顯示到畫面中
-        function showDataToView(data, clearAll) {
-            var container = $("#query-result tbody");
+        //在地圖中繪製標示
+        function showMarkersToMap(data) {
+            console.log(data);
 
-            //清除原有列
-            if (clearAll) container.html('');
-
-            for (var key in data) {
-                var item = data[key];
-                //製作要插入的列
-                var tr = $('<tr>');
-                var id = $('<td>').text(item.id);
-                var city = $('<td>').text(item.city.name);
-                var region = $('<td>').text(item.region.name);
-                var ground = $('<td>').text(item.ground + "坪");
-                var price = $('<td>').text(item.price + "萬");
-                var parking = $('<td>').text(item.parking == 0 ? '平面' : '機械');
-                //插入內容
-                tr.append(id);
-                tr.append(city);
-                tr.append(region);
-                tr.append(ground);
-                tr.append(price);
-                tr.append(parking);
-                //插入列
-                tr.appendTo(container);
+            //清除原有的Marker
+            if (markers.length > 0) {
+                for (var i = 0; i < markers.length; i++) {
+                    var marker = markers.pop();
+                    marker.setMap(null);
+                }
             }
 
+            //放入新的Marker
+            for (var k in data) {
+                var item = data[k];
+                var marker = new google.maps.Marker({
+                    position: new google.maps.LatLng(item.lat, item.lng),
+                    map: map
+                });
+
+                google.maps.event.addListener(marker, 'click', function (e) {
+                    var place = $("<div>").html("所在地:" + item.city.name + item.region.name);
+                    var ground = $("<div>").html("坪數:" + item.ground + "坪");
+                    var price = $("<div>").html("總價:" + item.price + "萬");
+                    var parking = $("<div>").html("車位:" + item.parking == 0 ? "平面車位" : "機械式車位");
+
+                    $("#infobox-data").html('');
+                    $("#infobox-data").append(place);
+                    $("#infobox-data").append(ground);
+                    $("#infobox-data").append(price);
+                    $("#infobox-data").append(parking);
+
+                    createInfoBox(this);
+                });
+
+                markers.push(marker);
+            }
         }
 
-        execQuery(true);
+        function createInfoBox(marker) {
+            if (infobox) infobox.close();
+
+            //初始化訊息框
+            infobox = new InfoBox({
+                content: $("#infobox-wrapper").clone()[0],
+                alignBottom: true,
+                pixelOffset: new google.maps.Size(-180, -40)
+            });
+
+            infobox.open(map, marker);
+        }
+
+        execQuery();
     });
 </script>

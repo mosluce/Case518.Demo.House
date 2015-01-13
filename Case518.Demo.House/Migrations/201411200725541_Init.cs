@@ -36,6 +36,8 @@ namespace Case518.Demo.House.Migrations
                         Parking = c.Int(nullable: false),
                         Price = c.Int(nullable: false),
                         Ground = c.Int(nullable: false),
+                        Lat = c.Double(nullable: false),
+                        Lng = c.Double(nullable: false),
                         City_Id = c.Int(),
                         Region_Id = c.Int(),
                     })
@@ -45,16 +47,31 @@ namespace Case518.Demo.House.Migrations
                 .Index(t => t.City_Id)
                 .Index(t => t.Region_Id);
             
+            CreateTable(
+                "dbo.Photos",
+                c => new
+                    {
+                        Id = c.Int(nullable: false, identity: true),
+                        Path = c.String(),
+                        House_Id = c.Int(),
+                    })
+                .PrimaryKey(t => t.Id)
+                .ForeignKey("dbo.Houses", t => t.House_Id)
+                .Index(t => t.House_Id);
+            
         }
         
         public override void Down()
         {
             DropForeignKey("dbo.Houses", "Region_Id", "dbo.Regions");
+            DropForeignKey("dbo.Photos", "House_Id", "dbo.Houses");
             DropForeignKey("dbo.Houses", "City_Id", "dbo.Cities");
             DropForeignKey("dbo.Regions", "City_Id", "dbo.Cities");
+            DropIndex("dbo.Photos", new[] { "House_Id" });
             DropIndex("dbo.Houses", new[] { "Region_Id" });
             DropIndex("dbo.Houses", new[] { "City_Id" });
             DropIndex("dbo.Regions", new[] { "City_Id" });
+            DropTable("dbo.Photos");
             DropTable("dbo.Houses");
             DropTable("dbo.Regions");
             DropTable("dbo.Cities");
