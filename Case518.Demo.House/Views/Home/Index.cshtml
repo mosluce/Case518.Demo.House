@@ -90,10 +90,18 @@
         <div class="row" style="background-color: white;">
             <img class="col-md-5" src="@Url.Content("~/Assets/1487051.png")" />
             <div class="col-md-5" style="padding: 5px;" id="infobox-data">
-                所在地: 
-                坪數:
-                總價:
-                車位:
+                <div class="content">
+                    所在地:
+                    坪數:
+                    總價:
+                    車位:
+                </div>
+                <div id="infobox-pager-changer" style="border-top: 1px solid black;">
+                    <div class="row">
+                        <div class="col-md-5 icon-prev">Prev</div>
+                        <div class="col-md-5 icon-next">Next</div>
+                    </div>
+                </div>
             </div>
         </div>
         <div style="height: 15px; background-position: center bottom; background-size: 15px 15px; background-repeat: no-repeat; background-image:url('@Url.Content("~/Assets/arrow.png")');" class="row">
@@ -107,6 +115,11 @@
     var markers = [];
     var defaultLat = @ViewBag.DefaultLat;
     var defaultLng = @ViewBag.DefaultLng;
+
+    //座標集合
+    var dataCollectionOfLatLng = {};
+    var currentDataCollection;
+    var currentCollectionIndex;
 
     //查詢用變數
     var price = [], ground = [], parking = [], cityId = null, regionId = null;
@@ -122,9 +135,12 @@
                 center: new google.maps.LatLng(defaultLat, defaultLng)
             });
         //地圖事件
-        google.maps.event.addListener(map, "click", function () {
+        google.maps.event.addListener(map, "click", function (e) {
             infobox.close();
             infobox = null;
+
+            console.log("map clicked");
+            console.log(e);
         });
         //地理編碼器初始化
         geocoder = new google.maps.Geocoder();
@@ -313,6 +329,11 @@
                 markers = [];
             }
 
+            //清除資料集合
+            dataCollectionOfLatLng = {};
+            currentDataCollection = null;
+            currentCollectionIndex = 0;
+
             //沒有資料時
             if (data.length == 0) {
                 alert("查詢不到資料");
@@ -331,42 +352,88 @@
 
         //建立Marker工廠
         function createMarker(item) {
-            console.log(item);
-
             var marker = new google.maps.Marker({
                 position: new google.maps.LatLng(item.lat, item.lng),
                 map: map
             });
 
+            var key = item.lat + ',' + item.lng;
+
+            if(!dataCollectionOfLatLng[key]) dataCollectionOfLatLng[key] = [];
+            dataCollectionOfLatLng[key].push(item);
+
             google.maps.event.addListener(marker, 'click', function (e) {
-                var place = $("<div>").html("所在地:" + item.city.name + item.region.name);
-                var ground = $("<div>").html("坪數:" + item.ground + "坪");
-                var price = $("<div>").html("總價:" + item.price + "萬");
-                var parking = $("<div>").html("車位:" + (item.parking == 0 ? "平面車位" : "機械式車位"));
+                var key = e.latLng.lat() + ',' + e.latLng.lng();
+                var item = dataCollectionOfLatLng[key][0];
 
-                $("#infobox-data").html('');
-                $("#infobox-data").append(place);
-                $("#infobox-data").append(ground);
-                $("#infobox-data").append(price);
-                $("#infobox-data").append(parking);
+                //紀錄現在使用的集合
+                currentDataCollection = dataCollectionOfLatLng[key];
+                currentCollectionIndex = 0;
 
-                createInfoBox(this);
+                map.setCenter(e.latLng);
+
+                showInfoBox(marker, item);
             });
 
             markers.push(marker);
         }
 
         //建立InfoBox工廠
-        function createInfoBox(marker) {
+        function showInfoBox(marker, item) {
             if (infobox) infobox.close();
 
+            //設定要顯示的資料
+            var place = $("<div>").html("所在地:" + item.city.name + item.region.name);
+            var ground = $("<div>").html("坪數:" + item.ground + "坪");
+            var price = $("<div>").html("總價:" + item.price + "萬");
+            var parking = $("<div>").html("車位:" + (item.parking == 0 ? "平面車位" : "機械式車位"));
+
+            var container = $("#infobox-data .content");
+            container.html('');
+            container.append(place);
+            container.append(ground);
+            container.append(price);
+            container.append(parking);
+
+            var infoContent = $("#infobox-wrapper").clone()[0];
+            var chger = $($(infoContent).find('#infobox-pager-changer')[0]);
+            var prev = $(chger.find('.icon-prev')[0]);
+            var next = $(chger.find('.icon-next')[0]);
+
+            //設定選頁器
+            if(currentDataCollection.length == 1) {
+                chger.hide();
+            } else {
+                chger.show();
+
+                if(currentCollectionIndex == 0) prev.hide();
+                else prev.show();
+
+                if(currentCollectionIndex == currentDataCollection.length - 1) next.hide();
+                else next.show();
+
+                prev.click(function(e) {
+                    e.preventDefault();
+
+                    var item = currentDataCollection[--currentCollectionIndex];
+                    showInfoBox(marker, item);
+                });
+                next.click(function(e) {
+                    e.preventDefault();
+
+                    var item = currentDataCollection[++currentCollectionIndex];
+                    showInfoBox(marker, item);
+                });
+            }
+            
             //初始化訊息框
             infobox = new InfoBox({
-                content: $("#infobox-wrapper").clone()[0],
+                content: infoContent,
                 alignBottom: true,
                 pixelOffset: new google.maps.Size(-180, -40)
             });
 
+            //顯示
             infobox.open(map, marker);
         }
 
