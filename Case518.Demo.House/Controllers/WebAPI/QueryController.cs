@@ -14,7 +14,7 @@ namespace Case518.Demo.House.Controllers.WebAPI
         {
             using (var db = new HouseModel())
             {
-                IQueryable<Models.House> query = db.Houses.Include("Region").Include("City").Where(c=>true);
+                IQueryable<Models.House> query = db.Houses.Include("Region").Include("City").Include("Photos").Where(c => true);
 
                 #region 篩選縣市
                 

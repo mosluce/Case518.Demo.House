@@ -88,7 +88,7 @@
 <div style="display: none;">
     <div id="infobox-wrapper" class="container-fluid" style="width: 360px;">
         <div class="row" style="background-color: white;">
-            <img class="col-md-5" src="@Url.Content("~/Assets/1487051.png")" />
+            <img class="col-md-5" id="infobox-photo" />
             <div class="col-md-5" style="padding: 5px;" id="infobox-data">
                 <div class="content">
                     所在地:
@@ -387,6 +387,9 @@
             var ground = $("<div>").html("坪數:" + item.ground + "坪");
             var price = $("<div>").html("總價:" + item.price + "萬");
             var parking = $("<div>").html("車位:" + (item.parking == 0 ? "平面車位" : "機械式車位"));
+
+            var infoboxPhoto = $("#infobox-photo");
+            infoboxPhoto.attr("src", 'http://' + window.location.hostname + item.photos[0].path);
 
             var container = $("#infobox-data .content");
             container.html('');
